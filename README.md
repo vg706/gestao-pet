@@ -112,24 +112,31 @@ O sistema segue uma arquitetura cliente-servidor com frontend multiplataforma (w
 
 ### Telas Mobile
 **Tela de Login**
+
 ![](prototypes/mobile/login.png)
 
 **Tela de Cadastro de Usuário**
+
 ![](prototypes/mobile/cadastro-usuario.png)
 
 **Tela Meus Pets**
+
 ![](prototypes/mobile/meus-pets.png)
 
 **Tela Cadastro Animal**
+
 ![](prototypes/mobile/cadastro-animal.png)
 
 **Tela Perfil Animal**
+
 ![](prototypes/mobile/perfil-pet.png)
 
 **Tela Histórico**
+
 ![](prototypes/mobile/pesquisa-animal.png)
 
 **Tela Registro Consulta**
+
 ![](prototypes/mobile/registro-consulta.png)
 
 ## Tecnologias propostas
