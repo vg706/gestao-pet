@@ -1,28 +1,48 @@
-import { View, Text, TextInput, Button } from 'react-native';
-import { useLogin } from './hooks/use-login';
-import { getLoginInfo, loginInfo } from './parse-config';
+import { View, Text, TextInput, Button, Alert, TouchableOpacity } from 'react-native';
+import { useState } from 'react';
+import Parse from "parse/react-native.js";
 import { Picker } from '@react-native-picker/picker';
 import { useRouter } from 'expo-router';
-import { styles } from './styles';
+import { styles } from '../styles/styles';
 
+export default function LoginView() {
+    const router = useRouter();
+    const [userType, setUserType] = useState("tutor");
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
 
-export default function loginView() {
-  const router = useRouter();
-  const [userType, setUserType] = useState("tutor");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+    const executeUserLogin = async () => {
+        if (!email || !password) {
+            Alert.alert("Erro", "Digite email e senha.");
+            return;
+        }
+        try {
+            const loggedInUser = await Parse.User.logIn(email, password);
+            const role = loggedInUser.get("role");
 
-  const executeUserLogin = async function () {
-    
-  }
+            if (role !== userType) {
+                Alert.alert("Erro", "Usuário não encontrado.");
+                return;
+            }
+
+            if (role === "tutor") {
+                router.push("/tutor");
+            } else if (role === "funcionario") {
+                router.push("/employee");
+            }
+        } catch (error) {
+            console.log("login falhou", error);
+            Alert.alert("erro ao logar usuário", error.message);
+        }
+    }
 
   return (
       <View style={styles.container}>
-          <View>{/*card*/}
+          <View>
             <Text style={styles.title}>Gestão Pet</Text>
             <Text>Acompanhamento Veterinário</Text>
             <Text>Tipo de Usuário</Text>
-            <View> {/*picker*/}
+            <View>
                 <Picker
                     selectedValue={userType}
                     onValueChange={(itemValue) => setUserType(itemValue)}
@@ -33,29 +53,26 @@ export default function loginView() {
             </View>
             <Text>Email</Text>
             <TextInput
-                // style={?}
                 placeholder='Digite seu email'
                 value={email}
-                onChangeText={val => setEmail(val)}
+                onChangeText={setEmail}
                 keyboardType='email-address'
             />
             <Text>Senha</Text>
             <TextInput
-                // style={}
                 placeholder='Digite sua senha'
                 value={password}
-                onChangeText={val => setPassword(val)}
+                onChangeText={setPassword}
                 keyboardType='numbers-and-punctuation'
                 secureTextEntry={true}
             />
-            <Button
-                title='Entrar'
-                onPress={handleLogin}
-            />
-            <Text>
-                Não tem conta?
+            <TouchableOpacity onPress= {() => executeUserLogin() }>
+                <Text>Entrar</Text>
+            </TouchableOpacity>
+            <View>
+                <Text>Não tem conta?</Text>
                 <Button title="Cadastre-se" onPress={() => router.navigate('/signup')}/>
-            </Text>
+            </View>
           </View>
       </View>
   )
