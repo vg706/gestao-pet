@@ -1,4 +1,5 @@
-import { View, Text, TextInput, Button, Alert, TouchableOpacity } from 'react-native';
+// app/index.jsx
+import { View, Text, TextInput, Alert, TouchableOpacity, Platform } from 'react-native';
 import { useState } from 'react';
 import Parse from "parse/react-native.js";
 import { Picker } from '@react-native-picker/picker';
@@ -36,44 +37,83 @@ export default function LoginView() {
         }
     }
 
-  return (
-      <View style={styles.container}>
-          <View>
-            <Text style={styles.title}>Gestão Pet</Text>
-            <Text>Acompanhamento Veterinário</Text>
-            <Text>Tipo de Usuário</Text>
-            <View>
-                <Picker
-                    selectedValue={userType}
-                    onValueChange={(itemValue) => setUserType(itemValue)}
+    // Componente Picker para Web
+    const WebPicker = () => (
+        <select
+            value={userType}
+            onChange={(e) => setUserType(e.target.value)}
+            style={{
+                width: '100%',
+                padding: '12px 15px',
+                border: '1px solid #dce0e4',
+                borderRadius: '8px',
+                backgroundColor: '#fafafa',
+                fontSize: '16px',
+                marginBottom: '8px'
+            }}
+        >
+            <option value="tutor">Tutor de animal</option>
+            <option value="funcionario">Servidor</option>
+        </select>
+    );
+
+    // Componente Picker para Mobile
+    const MobilePicker = () => (
+        <View style={styles.pickerContainer}>
+            <Picker
+                style={styles.picker}
+                selectedValue={userType}
+                onValueChange={(itemValue) => setUserType(itemValue)}
+            >
+                <Picker.Item label="Tutor de animal" value="tutor"/>
+                <Picker.Item label="Servidor" value="funcionario"/>
+            </Picker>
+        </View>
+    );
+
+    return (
+        <View style={styles.loginContainer}>
+            <View style={styles.signupCard}>
+                <Text style={styles.loginTitle}>Gestão Pet</Text>
+                <Text style={styles.loginSubtitle}>Acompanhamento Veterinário</Text>
+                
+                <Text style={styles.textLabel}>Tipo de Usuário</Text>
+                {Platform.OS === 'web' ? <WebPicker /> : <MobilePicker />}
+
+                <Text style={styles.textLabel}>E-mail</Text>
+                <TextInput
+                    style={styles.input}
+                    placeholder='Digite seu email'
+                    value={email}
+                    onChangeText={setEmail}
+                    keyboardType='email-address'
+                    autoCapitalize='none'
+                />
+
+                <Text style={styles.textLabel}>Senha</Text>
+                <TextInput
+                    style={styles.input}
+                    placeholder='Digite sua senha'
+                    value={password}
+                    onChangeText={setPassword}
+                    secureTextEntry={true}
+                    autoCapitalize='none'
+                />
+
+                <TouchableOpacity 
+                    style={styles.loginButton}
+                    onPress={executeUserLogin}
                 >
-                    <Picker.Item label="Tutor de animal" value="tutor"/>
-                    <Picker.Item label="Servidor" value="funcionario"/>
-                </Picker>
+                    <Text style={styles.buttonText}>Entrar</Text>
+                </TouchableOpacity>
+
+                <View style={styles.signupContainer}>
+                    <Text style={styles.signupText}>Não tem conta?</Text>
+                    <TouchableOpacity onPress={() => router.navigate('/signup')}>
+                        <Text style={styles.signupButton}>Cadastre-se</Text>
+                    </TouchableOpacity>
+                </View>
             </View>
-            <Text>E-mail</Text>
-            <TextInput
-                placeholder='Digite seu email'
-                value={email}
-                onChangeText={setEmail}
-                keyboardType='email-address'
-            />
-            <Text>Senha</Text>
-            <TextInput
-                placeholder='Digite sua senha'
-                value={password}
-                onChangeText={setPassword}
-                keyboardType='numbers-and-punctuation'
-                secureTextEntry={true}
-            />
-            <TouchableOpacity onPress= {() => executeUserLogin() }>
-                <Text>Entrar</Text>
-            </TouchableOpacity>
-            <View>
-                <Text>Não tem conta?</Text>
-                <Button title="Cadastre-se" onPress={() => router.navigate('/signup')}/>
-            </View>
-          </View>
-      </View>
-  )
+        </View>
+    );
 }
