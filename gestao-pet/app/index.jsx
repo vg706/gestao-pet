@@ -48,10 +48,10 @@ export default function LoginView() {
                     onValueChange={(itemValue) => setUserType(itemValue)}
                 >
                     <Picker.Item label="Tutor de animal" value="tutor"/>
-                    <Picker.Item label="Servidor" value="servidor"/>
+                    <Picker.Item label="Servidor" value="funcionario"/>
                 </Picker>
             </View>
-            <Text>Email</Text>
+            <Text>E-mail</Text>
             <TextInput
                 placeholder='Digite seu email'
                 value={email}

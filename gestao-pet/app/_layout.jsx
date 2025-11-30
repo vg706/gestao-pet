@@ -1,6 +1,7 @@
 import { Stack } from "expo-router";
-import '../parse-config';
+import {setParseConfig} from '../parse-config';
 
+setParseConfig();
 export default function RootLayout() {
   return (
     <Stack>

@@ -9,20 +9,46 @@ const signupView = () => {
     const router = useRouter();
     const [userType, setUserType] = useState("tutor");
     const [email, setEmail] = useState("");
+    const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const executeSignup = async () => {
-        const user = new Parse.User();
-        user.set("role", userType);
-        user.set("username", email); 
-        user.set("email", email);
-        user.set("password", password);
-        
         try {
-            await user.signUp();
+            if (!username || !email || !password) {
+            Alert.alert("Erro", "Preencha todos os campos.");
+            return;
+            }
+
+            await Parse.User.logOut();
+
+            const user = new Parse.User();
+
+            user.set("username", email);
+            user.set("email", email);
+            user.set("password", password);
+            user.set("role", userType);
+
+            const createdUser = await user.signUp();
+
+            await saveUserToType(createdUser);
             Alert.alert("Conta criada!", "Usuário registrado com sucesso.");
             router.replace("/");
-        } catch(error) {
-            Alert.alert("Erro no cadastro", error.message);
+        } catch (error) {
+            console.log("RAW ERROR:", error);
+            console.log("ERROR KEYS:", Object.keys(error || {}));
+            Alert.alert("Erro no cadastro", String(error));
+        }
+    };
+    const saveUserToType = async (createdUser) => {
+        try {
+            const userDetails = new Parse.Object(userType === "tutor" ? "Tutor" : "Funcionario");
+            userDetails.set("nome", username);
+            userDetails.set("usuario", createdUser);
+            userDetails.set("email", email);
+            userDetails.set("senha", password);
+            await userDetails.save();
+        } catch (error) {
+            console.log("FULL SERVER ERROR:", JSON.stringify(error, null, 2));
+            Alert.alert("Erro ao salvar detalhes do usuário", error.message);
         }
     }
     return (
@@ -38,6 +64,13 @@ const signupView = () => {
                     <Picker.Item label="Servidor" value="funcionario"/>
                 </Picker>
             </View>
+            <Text>Nome Completo</Text>
+            <TextInput
+                placeholder='Seu nome completo'
+                value={username}
+                onChangeText={setUsername}
+                keyboardType='default'
+            />
             <Text>Email</Text>
             <TextInput
                 placeholder='Digite seu email'
