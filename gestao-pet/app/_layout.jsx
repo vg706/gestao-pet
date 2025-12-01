@@ -1,4 +1,5 @@
-// app/_layout.jsx
+import 'react-native-get-random-values';
+import * as Crypto from 'expo-crypto';
 import { Stack } from "expo-router";
 import { setParseConfig } from '../parse-config';
 import { styles } from '../styles/styles';
@@ -13,7 +14,7 @@ export default function RootLayout() {
         headerStyle: styles.headerStyle,
         headerTitleStyle: styles.headerTitleStyle,
         headerTintColor: styles.headerTintColor.color,
-        headerBackTitle: "Voltar", // Texto do botão voltar no iOS
+        headerBackTitle: "Voltar",
         contentStyle: { backgroundColor: '#f5f5f5' }, // Cor de fundo de todas as telas
       }}
     >

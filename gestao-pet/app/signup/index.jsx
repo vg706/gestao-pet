@@ -13,6 +13,7 @@ const SignupView = () => {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
 
+    // Faz o cadastro do usuário depois do preenchimento dos dados essenciais
     const executeSignup = async () => {
         try {
             if (!username || !email || !password) {
@@ -20,8 +21,10 @@ const SignupView = () => {
                 return;
             }
 
+            // Desloga qualquer usuário atualmente logado (evita usar uma sessão que já tinha sido criada)
             await Parse.User.logOut();
 
+            // Cria um novo Objeto _User que já vem por padrão no Back4App
             const user = new Parse.User();
             user.set("username", email);
             user.set("email", email);
@@ -29,6 +32,8 @@ const SignupView = () => {
             user.set("role", userType);
 
             const createdUser = await user.signUp();
+            
+            // Salva os detalhes adicionais do usuário na sua classe (Tutor ou Funcionario)
             await saveUserToType(createdUser);
             
             Alert.alert("Conta criada!", "Usuário registrado com sucesso.");
@@ -39,7 +44,7 @@ const SignupView = () => {
             Alert.alert("Erro no cadastro", String(error));
         }
     };
-
+    // Salvar os dados do User no seu tipo (Tutor ou Funcionario)
     const saveUserToType = async (createdUser) => {
         try {
             const userDetails = new Parse.Object(userType === "tutor" ? "Tutor" : "Funcionario");
@@ -70,10 +75,11 @@ const SignupView = () => {
                     <Picker
                         style={styles.picker}
                         selectedValue={userType}
-                        onValueChange={setUserType}
+                        onValueChange={(value) => setUserType(value)}
+                        itemStyle={styles.pickerItem}
                     >
-                        <Picker.Item label="Tutor de animal" value="tutor"/>
-                        <Picker.Item label="Servidor" value="funcionario"/>
+                        <Picker.Item label="Tutor de animal" value="tutor" />
+                        <Picker.Item label="Servidor" value="funcionario" />
                     </Picker>
                 </View>
 

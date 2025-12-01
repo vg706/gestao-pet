@@ -1,4 +1,3 @@
-// app/index.jsx
 import { View, Text, TextInput, Alert, TouchableOpacity, Platform } from 'react-native';
 import { useState } from 'react';
 import Parse from "parse/react-native.js";
@@ -12,6 +11,7 @@ export default function LoginView() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
+    // Função para realizar login do usuário
     const executeUserLogin = async () => {
         if (!email || !password) {
             Alert.alert("Erro", "Digite email e senha.");
@@ -21,11 +21,13 @@ export default function LoginView() {
             const loggedInUser = await Parse.User.logIn(email, password);
             const role = loggedInUser.get("role");
 
+            // se a conta não corresponder com o tipo do usuário, não prossegue
             if (role !== userType) {
                 Alert.alert("Erro", "Usuário não encontrado.");
                 return;
             }
 
+            // Redireciona para a página de cada tipo de usuário
             if (role === "tutor") {
                 router.push("/tutor");
             } else if (role === "funcionario") {
@@ -59,16 +61,15 @@ export default function LoginView() {
 
     // Componente Picker para Mobile
     const MobilePicker = () => (
-        <View style={styles.pickerContainer}>
-            <Picker
-                style={styles.picker}
-                selectedValue={userType}
-                onValueChange={(itemValue) => setUserType(itemValue)}
-            >
-                <Picker.Item label="Tutor de animal" value="tutor"/>
-                <Picker.Item label="Servidor" value="funcionario"/>
-            </Picker>
-        </View>
+        <Picker
+            selectedValue={userType}
+            onValueChange={(itemValue) => setUserType(itemValue)}
+            style={styles.picker}
+            itemStyle={styles.pickerItem}
+        >
+            <Picker.Item label="Tutor de animal" value="tutor"/>
+            <Picker.Item label="Servidor" value="funcionario"/>
+        </Picker>
     );
 
     return (
@@ -100,17 +101,17 @@ export default function LoginView() {
                     autoCapitalize='none'
                 />
 
-                <TouchableOpacity 
+                <TouchableOpacity
                     style={styles.loginButton}
                     onPress={executeUserLogin}
                 >
                     <Text style={styles.buttonText}>Entrar</Text>
                 </TouchableOpacity>
 
-                <View style={styles.signupContainer}>
-                    <Text style={styles.signupText}>Não tem conta?</Text>
+                <View style={styles.loginSignupRow}>
+                    <Text style={styles.loginSignupText}>Não tem conta?</Text>
                     <TouchableOpacity onPress={() => router.navigate('/signup')}>
-                        <Text style={styles.signupButton}>Cadastre-se</Text>
+                        <Text style={styles.loginSignupButton}>Cadastre-se</Text>
                     </TouchableOpacity>
                 </View>
             </View>

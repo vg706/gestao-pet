@@ -1,10 +1,9 @@
-// app/employee/index.jsx
 import { View, Text, TouchableOpacity, FlatList } from 'react-native';
 import React from 'react';
 import { SearchBar } from 'react-native-elements';
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
-import Parse from 'parse/react-native';
+import Parse from 'parse/react-native.js';
 import { styles } from '../../styles/styles';
 
 export default function EmployeeHomeView() {
@@ -14,12 +13,14 @@ export default function EmployeeHomeView() {
     const [animals, setAnimals] = useState([]);
     const [selectedTutor, setSelectedTutor] = useState(null);
 
+    // Função para buscar tutores pelo seu nome
     async function searchTutors(text) {
         setSearch(text);
         setSelectedTutor(null);
         setAnimals([]);
 
-        if (text.length < 2) {
+        // Começa a mostrar quando digita a primeira letra na caixa de texto
+        if (text.length < 1) {
             setTutors([]);
             return;
         }
@@ -28,7 +29,8 @@ export default function EmployeeHomeView() {
             const tutor = Parse.Object.extend('Tutor');
             const query = new Parse.Query(tutor);
             
-            query.contains('nome', text);
+            // busca pelos tutores que seu nome combine com o que está escrito
+            query.matches('nome', new RegExp(text, 'i'));
             query.limit(20);
 
             const results = await query.find();
@@ -38,6 +40,7 @@ export default function EmployeeHomeView() {
         }
     }
 
+    // Função para mostrar os animais do tutor escolhido
     async function searchTutorAnimals(tutor) {
         setSelectedTutor(tutor);
 
@@ -58,7 +61,7 @@ export default function EmployeeHomeView() {
         <View style={styles.employeeContainer}>
             <View style={styles.searchContainer}>
                 <SearchBar
-                    placeholder='Buscar tutor... Ex: Maria Silva'
+                    placeholder='Ex: Maria Silva'
                     value={search}
                     onChangeText={searchTutors}
                     round
@@ -83,7 +86,7 @@ export default function EmployeeHomeView() {
                     )}
                     ListEmptyComponent={
                         <Text style={styles.emptyState}>
-                            {search.length >= 2 ? 'Nenhum tutor encontrado' : 'Digite pelo menos 2 caracteres para buscar'}
+                            {search.length >= 2 ? 'Nenhum tutor encontrado' : 'Busque os tutores pelo nome'}
                         </Text>
                     }
                 />

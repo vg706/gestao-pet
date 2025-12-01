@@ -1,9 +1,7 @@
-// app/employee/register-appointment.jsx
-import { View, Text, TouchableOpacity, TextInput, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, TextInput, Alert, ScrollView } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Picker } from '@react-native-picker/picker';
-import Parse from 'parse/react-native';
+import Parse from 'parse/react-native.js';
 import { styles } from '../../styles/styles';
 
 export default function RegisterAppointmentView() {
@@ -11,12 +9,13 @@ export default function RegisterAppointmentView() {
     const { animalId } = useLocalSearchParams();
     const [animal, setAnimal] = useState(null);
     const [vaccines, setVaccines] = useState([]);
-    const [selectedVaccine, setSelectedVaccine] = useState(null);
+    const [selectedVaccines, setSelectedVaccines] = useState([]);
     const [appointmentProcedures, setAppointmentProcedures] = useState('');
     const [appointmentObservations, setAppointmentObservations] = useState('');
     const [proceduresHeight, setProceduresHeight] = useState(40);
     const [observationsHeight, setObservationsHeight] = useState(40);
 
+    // Busca todas as vacinas ao carregar a tela
     useEffect(() => {
         fetchVaccines();
     }, []);
@@ -27,9 +26,10 @@ export default function RegisterAppointmentView() {
             const query = new Parse.Query(Vaccine);
             const results = await query.find();
 
+            // Formata os dados das vacinas para exibição
             const formattedVaccines = results.map(v => ({
                 id: v.id,
-                name: v.get("nome"), 
+                name: v.get("nome"),
             }));
 
             setVaccines(formattedVaccines);
@@ -38,11 +38,12 @@ export default function RegisterAppointmentView() {
         }
     }
 
+    // Busca os dados do animal atual
     useEffect(() => {
         async function fetchAnimal() {
             try {
-                const animal = Parse.Object.extend('Animal');
-                const query = new Parse.Query(animal);
+                const Animal = Parse.Object.extend('Animal');
+                const query = new Parse.Query(Animal);
                 const result = await query.get(animalId);
                 setAnimal(result);
             } catch (error) {
@@ -50,48 +51,62 @@ export default function RegisterAppointmentView() {
             }
         }
 
-        if (animalId) {
-            fetchAnimal();
-        }
+        if (animalId) fetchAnimal();
     }, [animalId]);
 
+    // Mostra um texto de carregamento se o animal ainda não foi buscado
     if (!animal) {
         return <Text style={styles.loadingText}>Carregando...</Text>;
     }
 
+    // Função para selecionar/deselecionar vacinas
+    const toggleVaccine = (vaccineId) => {
+        if (selectedVaccines.includes(vaccineId)) {
+            setSelectedVaccines(selectedVaccines.filter(id => id !== vaccineId));
+        } else {
+            setSelectedVaccines([...selectedVaccines, vaccineId]);
+        }
+    };
+
+    // Função para salvar o atendimento no Parse
     async function saveAppointment(animal) {
         try {
-            if (!selectedVaccine) {
-                Alert.alert("Erro", "Selecione uma vacina");
+            if (selectedVaccines.length === 0) {
+                Alert.alert("Erro", "Selecione pelo menos uma vacina");
                 return;
             }
 
             const Appointment = Parse.Object.extend('Atendimento');
             const newAppointment = new Appointment();
 
+            // Pega o funcionário logado
             const user = await Parse.User.currentAsync();
-
             const Funcionario = Parse.Object.extend('Funcionario');
             const queryFuncionario = new Parse.Query(Funcionario);
             queryFuncionario.equalTo("usuario", user);
+            const employee = await queryFuncionario.first();
 
-            let employee = await queryFuncionario.first();
-
-            const Vacina = Parse.Object.extend('Vacina');
-            const vaccinePointer = new Vacina();
-            vaccinePointer.id = selectedVaccine;
-
+            // Define os dados do atendimento
             newAppointment.set('animal', animal);
             newAppointment.set('funcionario', employee);
-            newAppointment.set('vacinas', vaccinePointer);
             newAppointment.set('relatorio', appointmentObservations);
             newAppointment.set('data', new Date());
+            newAppointment.set('procedimentos', appointmentProcedures);
+
+            // Adiciona as vacinas na Relation
+            const vacinasRelation = newAppointment.relation("vacinas");
+            selectedVaccines.forEach(vacId => {
+                const Vacina = Parse.Object.extend("Vacina");
+                const vacinaPointer = new Vacina();
+                vacinaPointer.id = vacId;
+                vacinasRelation.add(vacinaPointer);
+            });
 
             await newAppointment.save();
 
-            const relation = animal.relation("atendimentos");
-            relation.add(newAppointment);
-
+            // Adiciona atendimento na relação do animal
+            const animalRelation = animal.relation("atendimentos");
+            animalRelation.add(newAppointment);
             await animal.save();
 
             Alert.alert("Sucesso", "Consulta registrada com sucesso!");
@@ -104,7 +119,7 @@ export default function RegisterAppointmentView() {
     }
 
     return (
-        <View style={styles.registerAppointmentContainer}>
+        <ScrollView style={styles.registerAppointmentContainer} contentContainerStyle={{ paddingBottom: 30 }}>
             {/* Cabeçalho */}
             <View style={styles.animalInfo}>
                 <Text style={styles.animalName}>Animal: {animal.get('nome')}</Text>
@@ -121,36 +136,38 @@ export default function RegisterAppointmentView() {
                     value={appointmentProcedures}
                     onChangeText={setAppointmentProcedures}
                     multiline
-                    onContentSizeChange={(e) => {
-                        const newHeight = e.nativeEvent.contentSize.height;
-                        setProceduresHeight(Math.min(120, Math.max(40, newHeight)));
-                    }}
-                    style={[
-                        styles.textInputMultiline,
-                        { height: proceduresHeight }
-                    ]}
+                    onContentSizeChange={(e) => setProceduresHeight(Math.min(120, Math.max(40, e.nativeEvent.contentSize.height)))}
+                    style={[styles.textInputMultiline, { height: proceduresHeight }]}
                     placeholder="Descreva os procedimentos realizados..."
                 />
 
                 {/* Vacinas */}
                 <View style={styles.vaccineSection}>
                     <Text style={styles.textLabel}>Vacinas Aplicadas</Text>
-                    <View style={styles.pickerContainer}>
-                        <Picker
-                            style={styles.picker}
-                            selectedValue={selectedVaccine}
-                            onValueChange={(vaccineId) => setSelectedVaccine(vaccineId)}
+                    {vaccines.map(vaccine => (
+                        <TouchableOpacity
+                            key={vaccine.id}
+                            onPress={() => toggleVaccine(vaccine.id)}
+                            style={{
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                                marginVertical: 4
+                            }}
                         >
-                            <Picker.Item label="Selecione uma vacina" value={null} />
-                            {vaccines.map((vaccine) => (
-                                <Picker.Item
-                                    key={vaccine.id}
-                                    label={vaccine.name}
-                                    value={vaccine.id}
-                                />
-                            ))}
-                        </Picker>
-                    </View>
+                            <View
+                                style={{
+                                    width: 20,
+                                    height: 20,
+                                    borderWidth: 1,
+                                    borderColor: '#3498db',
+                                    borderRadius: 4,
+                                    marginRight: 8,
+                                    backgroundColor: selectedVaccines.includes(vaccine.id) ? '#3498db' : '#fff'
+                                }}
+                            />
+                            <Text style={{ color: '#2c3e50', fontSize: 16 }}>{vaccine.name}</Text>
+                        </TouchableOpacity>
+                    ))}
                 </View>
 
                 {/* Observações */}
@@ -159,25 +176,19 @@ export default function RegisterAppointmentView() {
                     value={appointmentObservations}
                     onChangeText={setAppointmentObservations}
                     multiline
-                    onContentSizeChange={(e) => {
-                        const newHeight = e.nativeEvent.contentSize.height;
-                        setObservationsHeight(Math.min(120, Math.max(40, newHeight)));
-                    }}
-                    style={[
-                        styles.textInputMultiline,
-                        { height: observationsHeight }
-                    ]}
+                    onContentSizeChange={(e) => setObservationsHeight(Math.min(120, Math.max(40, e.nativeEvent.contentSize.height)))}
+                    style={[styles.textInputMultiline, { height: observationsHeight }]}
                     placeholder="Observações adicionais..."
                 />
 
                 {/* Botão Salvar */}
-                <TouchableOpacity 
+                <TouchableOpacity
                     style={styles.saveButton}
                     onPress={() => saveAppointment(animal)}
                 >
                     <Text style={styles.buttonText}>Salvar registro de consulta</Text>
                 </TouchableOpacity>
             </View>
-        </View>
+        </ScrollView>
     );
 }

@@ -1,4 +1,3 @@
-// styles/styles.jsx
 import { Platform, StyleSheet } from 'react-native';
 
 export const styles = StyleSheet.create({
@@ -47,9 +46,11 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
   },
   buttonText: {
-    color: 'white',
+    color: '#FFFFFF',
     fontSize: 16,
     fontWeight: 'bold',
+    includeFontPadding: false,  
+    textAlignVertical: 'center' 
   },
   textTitle: { 
     fontSize: 24, 
@@ -69,6 +70,7 @@ export const styles = StyleSheet.create({
     marginBottom: 8,
     marginTop: 16,
   },
+
   input: {
     borderWidth: 1,
     borderColor: '#dce0e4',
@@ -78,15 +80,26 @@ export const styles = StyleSheet.create({
     fontSize: 16,
     backgroundColor: '#fafafa',
   },
+
   pickerContainer: {
     borderWidth: 1,
     borderColor: '#dce0e4',
     borderRadius: 8,
+    overflow: 'hidden',
     backgroundColor: '#fafafa',
-    marginBottom: 8,
+    marginBottom: 12,
   },
+  
   picker: {
-    height: 50,
+    height: 100,
+    marginBottom: 40,
+    width: '100%',
+    color: '#000000',
+  },
+
+  pickerItem: {
+    color: '#000',
+    fontSize: 16
   },
 
   // ===== HEADER STYLES (para _layout.jsx) - NOVOS ESTILOS =====
@@ -109,6 +122,7 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: 16,
   },
+
   loginTitle: { 
     fontSize: 32, 
     fontWeight: 'bold', 
@@ -116,11 +130,44 @@ export const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 8,
   },
+
   loginSubtitle: {
     fontSize: 16,
     color: '#7f8c8d',
     textAlign: 'center',
     marginBottom: 30,
+  },
+
+  loginButton: {
+    backgroundColor: '#27ae60',
+    paddingVertical: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center', 
+    marginTop: 16,
+    minHeight: 50, 
+  },
+
+  loginSignupRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 16,
+    width: '100%',
+    flexWrap: 'wrap', 
+  },
+
+  loginSignupText: {
+    fontSize: 14,
+    color: '#333',
+    marginRight: 6,
+  },
+
+  loginSignupButton: {
+    fontSize: 14,
+    color: '#27ae60',
+    fontWeight: 'bold',
+    paddingVertical: 2, 
   },
   
   // ===== EMPLOYEE HOME (app/employee/index.jsx) =====

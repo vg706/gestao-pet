@@ -1,10 +1,9 @@
-// app/tutor/register-animal.jsx
 import { View, Text, TextInput, TouchableOpacity, Platform, Alert, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import Parse from 'parse/react-native.js';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
-import DatePicker from 'react-native-date-picker';
 import { styles } from '../../styles/styles';
 
 export default function AnimalRegisterView() {
@@ -17,11 +16,13 @@ export default function AnimalRegisterView() {
     const [openCalendar, setOpenCalendar] = useState(false);
     const [observationsHeight, setObservationsHeight] = useState(40);
 
+    // Função para pegar o usuário atual
     const getCurrentUser = async function () {
         const currentUser = await Parse.User.currentAsync();
         return currentUser;
     }
 
+    // Função para registrar animal no banco de dados, relacionado ao tutor logado
     const registerAnimal = async () => {
         try {
             if (!animalName.trim()) {
@@ -29,9 +30,11 @@ export default function AnimalRegisterView() {
                 return;
             }
 
+
             const newAnimal = new Parse.Object("Animal");
             const user = await getCurrentUser();
 
+            // Define o tutor do animal como o usuário logado
             const currentTutor = Parse.Object.extend('Tutor');
             const tutorQuery = new Parse.Query(currentTutor);
             tutorQuery.equalTo("usuario", user);
@@ -59,6 +62,7 @@ export default function AnimalRegisterView() {
         }
     }
 
+    // Data para o formato br
     const formatDate = (date) => {
         return date.toLocaleDateString('pt-BR');
     };
@@ -89,14 +93,16 @@ export default function AnimalRegisterView() {
                 {/* Espécie */}
                 <View style={styles.formSection}>
                     <Text style={styles.textLabel}>Espécie</Text>
-                    <View style={styles.pickerContainer}>
+
+                    <View style={styles.pickerWrapper}>
                         <Picker
-                            style={styles.picker}
-                            selectedValue={animalEspecies}
-                            onValueChange={(speciesValue) => setAnimalSpecies(speciesValue)}
+                        selectedValue={animalEspecies}
+                        onValueChange={(speciesValue) => setAnimalSpecies(speciesValue)}
+                        style={styles.pickerFixed}
+                        itemStyle={styles.pickerItem}
                         >
-                            <Picker.Item label="Cachorro" value="Cachorro"/>
-                            <Picker.Item label="Gato" value="Gato"/>
+                        <Picker.Item label="Cachorro" value="Cachorro" />
+                        <Picker.Item label="Gato" value="Gato" />
                         </Picker>
                     </View>
                 </View>
@@ -115,48 +121,43 @@ export default function AnimalRegisterView() {
                 {/* Data de Nascimento */}
                 <View style={styles.formSection}>
                     <Text style={styles.textLabel}>Data de nascimento (aproximada)</Text>
+
                     {Platform.OS === 'web' ? (
                         <input
-                            type="date"
-                            style={styles.webDateInput}
-                            onChange={(e) => {
-                                const [year, month, day] = e.target.value.split("-");
-                                const fixedDate = new Date(year, month - 1, day);
-                                setBirthDate(fixedDate);
-                            }}
+                        type="date"
+                        style={styles.webDateInput}
+                        onChange={(e) => {
+                            const [year, month, day] = e.target.value.split("-");
+                            const fixedDate = new Date(year, month - 1, day);
+                            setBirthDate(fixedDate);
+                        }}
                         />
                     ) : (
                         <>
-                            <TouchableOpacity 
-                                style={styles.datePickerButton}
-                                onPress={() => setOpenCalendar(true)}
-                            >
-                                <Text style={[
-                                    styles.datePickerText,
-                                    !birthDate && styles.datePlaceholder
-                                ]}>
-                                    {birthDate ? formatDate(birthDate) : 'Selecione uma data'}
-                                </Text>
-                            </TouchableOpacity>
-                            <DatePicker
-                                modal
-                                open={openCalendar}
-                                date={birthDate}
-                                mode="date"
-                                onConfirm={(date) => {
-                                    setOpenCalendar(false);
-                                    const correctedDate = new Date(
-                                        date.getFullYear(),
-                                        date.getMonth(),
-                                        date.getDate()
-                                    );
-                                    setBirthDate(correctedDate);
-                                }}
-                                onCancel={() => setOpenCalendar(false)}
+                        <TouchableOpacity 
+                            style={styles.datePickerButton}
+                            onPress={() => setOpenCalendar(true)}
+                        >
+                            <Text style={styles.datePickerText}>
+                            {formatDate(birthDate)}
+                            </Text>
+                        </TouchableOpacity>
+
+                        {openCalendar && (
+                            <DateTimePicker
+                            value={birthDate}
+                            mode="date"
+                            display="default"
+                            onChange={(event, selectedDate) => {
+                                setOpenCalendar(false);
+                                if (selectedDate) setBirthDate(selectedDate);
+                            }}
                             />
+                        )}
                         </>
                     )}
                 </View>
+
 
                 {/* Observações */}
                 <View style={styles.formSection}>

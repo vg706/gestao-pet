@@ -1,9 +1,8 @@
-// app/tutor/index.jsx
 import { View, Text, TouchableOpacity, FlatList } from 'react-native';
 import { Stack, useRouter, useFocusEffect } from "expo-router";
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { useCallback, useState } from 'react';
-import Parse from "parse/react-native";
+import Parse from "parse/react-native.js";
 import { styles } from '../../styles/styles';
 
 export default function TutorHomeView() {
@@ -12,14 +11,32 @@ export default function TutorHomeView() {
 
     async function loadAnimals() {
         try {
-            const Animal = Parse.Object.extend("Animal");
-            const query = new Parse.Query(Animal);
-            const result = await query.find();
-            setAnimals(result);
+            // Pega o usuário que está logado agora
+          const currentUser = await Parse.User.currentAsync(); 
+          if (!currentUser) return;
+      
+          // Pega o tutor ligado ao usuário criado
+          const Tutor = Parse.Object.extend("Tutor");
+          const tutorQuery = new Parse.Query(Tutor);
+          tutorQuery.equalTo("usuario", currentUser);
+          const tutor = await tutorQuery.first();
+      
+          if (!tutor) {
+            setAnimals([]);
+            return;
+          }
+      
+          // Pega os animais ligados ao tutor
+          const Animal = Parse.Object.extend("Animal");
+          const animalQuery = new Parse.Query(Animal);
+          animalQuery.equalTo("tutor", tutor);
+          const result = await animalQuery.find();
+          setAnimals(result);
         } catch (error) {
-            console.log('Erro ao carregar animais:', error);
+          console.log('Erro ao carregar animais:', error);
         }
     }
+      
 
     useFocusEffect(
         useCallback(() => {
@@ -27,6 +44,7 @@ export default function TutorHomeView() {
         }, [])
     );
 
+    // Calcular idade do animal baseado no seu nascimento
     const calculateAge = (birthDate) => {
         const today = new Date();
         let age = today.getFullYear() - birthDate.getFullYear();
@@ -114,7 +132,6 @@ export default function TutorHomeView() {
                     />
                     <Text style={styles.addPetText}>Adicionar novo pet</Text>
                 </View>
-                <Text style={styles.addPetSubtext}>Cadastre um novo animal</Text>
             </TouchableOpacity>
         </View>
     );
