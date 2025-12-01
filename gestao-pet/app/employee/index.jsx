@@ -1,12 +1,13 @@
+// app/employee/index.jsx
 import { View, Text, TouchableOpacity, FlatList } from 'react-native';
 import React from 'react';
 import { SearchBar } from 'react-native-elements';
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
 import Parse from 'parse/react-native';
+import { styles } from '../../styles/styles';
 
-
-export default function employeeHomeView() {
+export default function EmployeeHomeView() {
     const router = useRouter();
     const [search, setSearch] = useState('');
     const [tutors, setTutors] = useState([]);
@@ -54,38 +55,56 @@ export default function employeeHomeView() {
     }
 
     return (
-        <View style={{ flex: 1 }}>
-            <SearchBar
-                placeholder='Ex: Maria Silva'
-                value={search}
-                onChangeText={searchTutors}
-                round
-                lightTheme
-            />
+        <View style={styles.employeeContainer}>
+            <View style={styles.searchContainer}>
+                <SearchBar
+                    placeholder='Buscar tutor... Ex: Maria Silva'
+                    value={search}
+                    onChangeText={searchTutors}
+                    round
+                    lightTheme
+                    containerStyle={{ backgroundColor: 'transparent' }}
+                    inputContainerStyle={{ backgroundColor: '#f0f0f0' }}
+                />
+            </View>
+            
             {!selectedTutor && (
                 <FlatList
                     data={tutors}
-                    keyExtractor={(item => item.id)}
+                    keyExtractor={(item) => item.id}
                     renderItem={({ item }) => (
-                        <TouchableOpacity onPress={() => searchTutorAnimals(item)}>
-                            <Text>{item.get('nome')}</Text>
-                            <Text>Pesquisar</Text>
+                        <TouchableOpacity 
+                            style={styles.tutorItem}
+                            onPress={() => searchTutorAnimals(item)}
+                        >
+                            <Text style={styles.tutorName}>{item.get('nome')}</Text>
+                            <Text style={styles.searchButton}>Ver animais</Text>
                         </TouchableOpacity>
                     )}
+                    ListEmptyComponent={
+                        <Text style={styles.emptyState}>
+                            {search.length >= 2 ? 'Nenhum tutor encontrado' : 'Digite pelo menos 2 caracteres para buscar'}
+                        </Text>
+                    }
                 />
             )}
+            
             {selectedTutor && (
                 <React.Fragment>
-                    <Text>
-                        Resultados para {selectedTutor.get('nome')}
+                    <Text style={styles.resultsHeader}>
+                        Animais de {selectedTutor.get('nome')}
                     </Text>
                     <FlatList
                         data={animals}
                         keyExtractor={(item) => item.id}
                         renderItem={({ item }) => (
-                            <View>
-                                <Text>{item.get('nome')} - {item.get('raca')} - {item.get('nascimento').toLocaleDateString('pt-BR')}</Text>
+                            <View style={styles.animalItem}>
+                                <Text style={styles.animalName}>{item.get('nome')}</Text>
+                                <Text style={styles.animalDetails}>
+                                    {item.get('raca')} • {item.get('nascimento').toLocaleDateString('pt-BR')}
+                                </Text>
                                 <TouchableOpacity 
+                                    style={styles.registerButton}
                                     onPress={() =>
                                         router.push({
                                             pathname: 'employee/register-appointment',
@@ -93,10 +112,13 @@ export default function employeeHomeView() {
                                         })
                                     }
                                 >
-                                    <Text>Registrar Consulta</Text>
+                                    <Text style={styles.registerButtonText}>Registrar Consulta</Text>
                                 </TouchableOpacity>
                             </View>
                         )}
+                        ListEmptyComponent={
+                            <Text style={styles.emptyState}>Nenhum animal encontrado para este tutor</Text>
+                        }
                     />
                 </React.Fragment>
             )}

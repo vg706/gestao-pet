@@ -1,9 +1,11 @@
-import { View, Text, TextInput, Button, Platform, Alert } from 'react-native';
+// app/tutor/register-animal.jsx
+import { View, Text, TextInput, TouchableOpacity, Platform, Alert, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import Parse from 'parse/react-native.js';
 import { Picker } from '@react-native-picker/picker';
 import DatePicker from 'react-native-date-picker';
+import { styles } from '../../styles/styles';
 
 export default function AnimalRegisterView() {
     const router = useRouter();
@@ -13,16 +15,20 @@ export default function AnimalRegisterView() {
     const [birthDate, setBirthDate] = useState(new Date());
     const [animalObservations, setAnimalObservations] = useState('');
     const [openCalendar, setOpenCalendar] = useState(false);
-    const [textInputHeight, setTextInputHeight] = useState(40);
-
+    const [observationsHeight, setObservationsHeight] = useState(40);
 
     const getCurrentUser = async function () {
-        const currentUser = Parse.User.currentAsync();
-        return currentUser
+        const currentUser = await Parse.User.currentAsync();
+        return currentUser;
     }
 
     const registerAnimal = async () => {
         try {
+            if (!animalName.trim()) {
+                Alert.alert("Erro", "Por favor, informe o nome do animal.");
+                return;
+            }
+
             const newAnimal = new Parse.Object("Animal");
             const user = await getCurrentUser();
 
@@ -37,96 +43,156 @@ export default function AnimalRegisterView() {
                 return;
             }
 
-            newAnimal.set("nome", animalName);
+            newAnimal.set("nome", animalName.trim());
             newAnimal.set("especie", animalEspecies);
-            newAnimal.set("raca", animalBreed);
+            newAnimal.set("raca", animalBreed.trim());
             newAnimal.set("nascimento", birthDate);
+            newAnimal.set("observacoes", animalObservations.trim());
             newAnimal.set("tutor", animalTutor);
+            
             await newAnimal.save();
+            Alert.alert("Sucesso", "Animal cadastrado com sucesso!");
             router.replace('/tutor');
         } catch (error) {
-            console.log("FULL SERVER ERROR:", JSON.stringify(error, null, 2));
-            console.log("RAW ERROR:", error);
-            Alert.alert("Erro ao salvar detalhes do usuário", error.message);
+            console.log("Erro ao cadastrar animal:", error);
+            Alert.alert("Erro", "Não foi possível cadastrar o animal. Tente novamente.");
         }
     }
 
+    const formatDate = (date) => {
+        return date.toLocaleDateString('pt-BR');
+    };
+
     return (
-        <View>
-            <Text>Cadastrar novo animal</Text>
-            <Text>Preencha os dados do seu pet</Text>
-            <Text>Nome do animal</Text>
-            <TextInput
-                placeholder='Ex: Rex, Luna'
-                value={animalName}
-                onChangeText={setAnimalName}
-            />
-            <Text>Espécie</Text>
-            <View>
-                <Picker
-                    selectedValue={animalEspecies}
-                    onValueChange={(speciesValue) => setAnimalSpecies(speciesValue)}
-                >
-                    <Picker.Item label="Cachorro" value="Cachorro"/>
-                    <Picker.Item label="Gato" value="Gato"/>
-                </Picker>
+        <ScrollView style={styles.registerAnimalContainer}>
+            {/* Cabeçalho */}
+            <View style={styles.registerAnimalHeader}>
+                <Text style={styles.registerAnimalTitle}>Cadastrar novo animal</Text>
+                <Text style={styles.textSubtitle}>Preencha os dados do seu pet</Text>
             </View>
-            <Text>Raça</Text>
-            <TextInput
-                placeholder='Ex: Labrador, Siamesa, SRD'
-                value={animalBreed}
-                onChangeText={setAnimalBreed}
-            />
-            <Text>Data de nascimento (aproximada)</Text>
-            {Platform.OS === 'web' ? (
-                <input
-                    type="date"
-                    onChange={(e) => {
-                        const [year, month, day] = e.target.value.split("-");
-                        const fixedDate = new Date(year, month - 1, day);
-                        setBirthDate(fixedDate);
-                    }}
-                />
-            ) : (
-                <DatePicker
-                    modal
-                    open={openCalendar}
-                    date={birthDate}
-                    mode="date"
-                    onConfirm={(date) => {
-                        setOpenCalendar(false);
-                        const correctedDate = new Date(
-                            date.getFullYear(),
-                            date.getMonth(),
-                            date.getDate()
-                        );
-                        setBirthDate(correctedDate);
-                    }}
-                    onCancel={() => setOpenCalendar(false)}
-                />
-            )}
-            <Text>Observações</Text>
-            <TextInput
-                value={animalObservations}
-                onChangeText={setAnimalObservations}
-                multiline
-                onContentSizeChange={(e) => {
-                    const newHeight = e.nativeEvent.contentSize.height;
-                    setTextInputHeight(Math.min(120, Math.max(40, newHeight)));
-                }}
-                style={{
-                    minHeight: 40,
-                    maxHeight: 120,
-                    height: textInputHeight,
-                    borderWidth: 1,
-                    padding: 10
-                }}
-                placeholder="Alergias, condições especiais..."
-            />
-            <View>
-                <Button title="Cancelar" onPress={() => router.replace('/tutor')}/>
-                <Button title="Salvar animal" onPress={() => registerAnimal() }/>
+
+            {/* Formulário */}
+            <View style={styles.registerAnimalForm}>
+                {/* Nome do Animal */}
+                <View style={styles.formSection}>
+                    <Text style={styles.textLabel}>
+                        Nome do animal <Text style={styles.requiredField}>*</Text>
+                    </Text>
+                    <TextInput
+                        style={styles.input}
+                        placeholder='Ex: Rex, Luna'
+                        value={animalName}
+                        onChangeText={setAnimalName}
+                    />
+                </View>
+
+                {/* Espécie */}
+                <View style={styles.formSection}>
+                    <Text style={styles.textLabel}>Espécie</Text>
+                    <View style={styles.pickerContainer}>
+                        <Picker
+                            style={styles.picker}
+                            selectedValue={animalEspecies}
+                            onValueChange={(speciesValue) => setAnimalSpecies(speciesValue)}
+                        >
+                            <Picker.Item label="Cachorro" value="Cachorro"/>
+                            <Picker.Item label="Gato" value="Gato"/>
+                        </Picker>
+                    </View>
+                </View>
+
+                {/* Raça */}
+                <View style={styles.formSection}>
+                    <Text style={styles.textLabel}>Raça</Text>
+                    <TextInput
+                        style={styles.input}
+                        placeholder='Ex: Labrador, Siamesa, SRD'
+                        value={animalBreed}
+                        onChangeText={setAnimalBreed}
+                    />
+                </View>
+
+                {/* Data de Nascimento */}
+                <View style={styles.formSection}>
+                    <Text style={styles.textLabel}>Data de nascimento (aproximada)</Text>
+                    {Platform.OS === 'web' ? (
+                        <input
+                            type="date"
+                            style={styles.webDateInput}
+                            onChange={(e) => {
+                                const [year, month, day] = e.target.value.split("-");
+                                const fixedDate = new Date(year, month - 1, day);
+                                setBirthDate(fixedDate);
+                            }}
+                        />
+                    ) : (
+                        <>
+                            <TouchableOpacity 
+                                style={styles.datePickerButton}
+                                onPress={() => setOpenCalendar(true)}
+                            >
+                                <Text style={[
+                                    styles.datePickerText,
+                                    !birthDate && styles.datePlaceholder
+                                ]}>
+                                    {birthDate ? formatDate(birthDate) : 'Selecione uma data'}
+                                </Text>
+                            </TouchableOpacity>
+                            <DatePicker
+                                modal
+                                open={openCalendar}
+                                date={birthDate}
+                                mode="date"
+                                onConfirm={(date) => {
+                                    setOpenCalendar(false);
+                                    const correctedDate = new Date(
+                                        date.getFullYear(),
+                                        date.getMonth(),
+                                        date.getDate()
+                                    );
+                                    setBirthDate(correctedDate);
+                                }}
+                                onCancel={() => setOpenCalendar(false)}
+                            />
+                        </>
+                    )}
+                </View>
+
+                {/* Observações */}
+                <View style={styles.formSection}>
+                    <Text style={styles.textLabel}>Observações</Text>
+                    <TextInput
+                        value={animalObservations}
+                        onChangeText={setAnimalObservations}
+                        multiline
+                        onContentSizeChange={(e) => {
+                            const newHeight = e.nativeEvent.contentSize.height;
+                            setObservationsHeight(Math.min(120, Math.max(40, newHeight)));
+                        }}
+                        style={[
+                            styles.textInputMultiline,
+                            { height: observationsHeight }
+                        ]}
+                        placeholder="Alergias, condições especiais, comportamentos..."
+                    />
+                </View>
+
+                {/* Botões */}
+                <View style={styles.buttonsContainer}>
+                    <TouchableOpacity 
+                        style={styles.cancelButton}
+                        onPress={() => router.replace('/tutor')}
+                    >
+                        <Text style={styles.buttonText}>Cancelar</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity 
+                        style={styles.saveAnimalButton}
+                        onPress={registerAnimal}
+                    >
+                        <Text style={styles.buttonText}>Salvar animal</Text>
+                    </TouchableOpacity>
+                </View>
             </View>
-        </View>
-    )
+        </ScrollView>
+    );
 }
