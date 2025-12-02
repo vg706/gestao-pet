@@ -87,8 +87,21 @@ export default function AnimalDetailsView() {
 
     // Formatação da data para o padrão br
     const formatDate = (date) => {
-        if (!date) return "";
-        return date.toLocaleDateString("pt-BR", {
+        if (!date) return "-";
+    
+        let parsedDate = date;
+    
+        // If it's a string, convert to Date
+        if (typeof date === "string") {
+            parsedDate = new Date(date);
+        }
+    
+        // If it's not a valid Date
+        if (!(parsedDate instanceof Date) || isNaN(parsedDate.getTime())) {
+            return "-";
+        }
+    
+        return parsedDate.toLocaleDateString("pt-BR", {
             day: "2-digit",
             month: "2-digit",
             year: "numeric",
@@ -158,7 +171,7 @@ export default function AnimalDetailsView() {
                 <View style={styles.animalInfoRow}>
                     <Text style={styles.animalInfoLabel}>Observações:</Text>
                     <Text style={styles.animalInfoValue}>
-                        {formatDate(animal.get("observacoes"))}
+                        {animal.get("observacoes") || "-"}
                     </Text>
                 </View>
             </View>
