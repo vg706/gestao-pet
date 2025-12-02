@@ -14,11 +14,23 @@ Em Fortaleza, o registro de animais atendidos pela rede pública de veterinária
 ## Acesso ao sistema
 
 Para executar o projeto:
-## 1. Instale a versão estável mais recente do Node.js.
-## 2. Após verificar que o npm foi instalado, execute 'npm install expo' no terminal do git bash dentro do repositório do projeto.
-## 3. Execute 'npx expo start' para iniciar o servidor do expo e você conseguirá acessar a aplicação pelo navegador e pelo celular.
+### 1. Instale a versão estável mais recente do Node.js.
+### 2. Após verificar que o npm foi instalado, execute 'npm install expo' no terminal do git bash dentro do repositório do projeto.
+### 3. Execute 'npx expo start' para iniciar o servidor do expo e você conseguirá acessar a aplicação pelo navegador e pelo celular.
+
+### Credenciais de acesso para teste:
+
+Tutor: 
+    email -> alunounifor1@gmail.com
+    senha -> unifor123
+
+Servidor público:
+    email -> carlos@prefeitura.com
+    senha -> prefeitura123
 
 ### ATENÇÃO -> Para o app funcionar no seu celular ao escanear o qrCode que vai aparecer no terminal após iniciar o servidor Expo, você precisa manter a versão do Parse em 4.2.0 ###
+
+
 
 ## Estrutura do projeto
 ```bash
