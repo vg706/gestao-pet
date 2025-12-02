@@ -154,6 +154,13 @@ export default function AnimalDetailsView() {
                         {formatDate(animal.get("nascimento"))}
                     </Text>
                 </View>
+
+                <View style={styles.animalInfoRow}>
+                    <Text style={styles.animalInfoLabel}>Observações:</Text>
+                    <Text style={styles.animalInfoValue}>
+                        {formatDate(animal.get("observacoes"))}
+                    </Text>
+                </View>
             </View>
 
             {/* Histórico de Consultas */}

@@ -1,0 +1,7 @@
+## Feedback dos usuários
+
+Ana, que testou o app como uma tutora de animais, considera que as funcionalidades da ferramenta são essenciais para todo consultório veterinário. Enquanto algumas clínicas particulares possuem seu registro interno, os clientes ainda assim não conseguem ter um acompanhamento próximo virtual e assíncrono de seus pets. E quando se trata do âmbito público disponibilizado pela prefeitura, não há nenhuma forma de acompanhar o que já foi feito ou ainda deve ser feito com meu animal. Ela teve dificuldades em saber como manejar o fluxo de cadastro e entrada no app, pois não tem muita experiência com o uso de aparelhos móveis, mas ao guiá-la pelo processo que podia ser feito, ela concluiu as atividades como tutora.
+
+Durante o teste de Cleyton que acessou o app como servidor público, o orientei a usar o cadastro já predefinido por mim de um funcionario padrão, pois já havia sido testado o cadastro e entrada com Ana. Ele teve mais facilidade em buscar um tutor, acessar um animal e registrar uma consulta.
+
+Fora as dificuldades comuns com relação aos costumes de uso de aparelhos celulares, pode-se observar que os usuários não tiveram grandes dificuldades de enxergar, interagir, ou se perderem no que estavam fazendo.

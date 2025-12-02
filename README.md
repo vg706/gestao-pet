@@ -11,6 +11,15 @@ Em Fortaleza, o registro de animais atendidos pela rede pública de veterinária
 - Vinicius Gabriel da Justa Ximenes: Gerente de Projeto e Testes. Matrícula: 2326167
 - William Julian Lemos de Holanda: Arquitetura e Banco de Dados. Matrícula: 2314705
 
+## Acesso ao sistema
+
+Para executar o projeto:
+## 1. Instale a versão estável mais recente do Node.js.
+## 2. Após verificar que o npm foi instalado, execute 'npm install expo' no terminal do git bash dentro do repositório do projeto.
+## 3. Execute 'npx expo start' para iniciar o servidor do expo e você conseguirá acessar a aplicação pelo navegador e pelo celular.
+
+### ATENÇÃO -> Para o app funcionar no seu celular ao escanear o qrCode que vai aparecer no terminal após iniciar o servidor Expo, você precisa manter a versão do Parse em 4.2.0 ###
+
 ## Estrutura do projeto
 ```bash
 gestao-pet/
@@ -24,6 +33,18 @@ gestao-pet/
 │   │   └── database_model.md
 │   └── api/
 │       └── api_specification.md
+├── gestao-pet/
+│   └──_layout.jsx                 
+│   └──index.jsx                   
+│   └──signup/                     
+│   │   └──index.jsx              
+│   │   └──tutor/                      
+│   │      └──index.jsx               
+│   │      └──animal-details.jsx     
+│   │      └── register-animal.jsx    
+│   └──employee/                   
+│      └── index.jsx              
+│      └── register-appointment.jsx 
 ├── prototypes/
 │   ├── web/
 │   │   ├── login.html
