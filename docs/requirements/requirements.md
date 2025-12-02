@@ -1,4 +1,7 @@
 # Documentação de Requisitos - Gestão-Pet
+
+Última atualização: 01/12/2025
+
 ## 1. Requisitos Funcionais
 
 ### 1.1. Módulo de Autenticação e Usuários
@@ -17,17 +20,26 @@
 ### 1.2. Módulo de Gestão de Animais (Tutor)
 **RF004 - Cadastro de Animais por Tutor**
 - Tutores devem poder cadastrar novos animais em seu perfil
-- Cada animal deve ter: nome, espécie, raça, data de nascimento aproximada
+
+***Funcionalidade adicionada: Animais podem ser excluídos pelo seu tutor***
+
+***Modificações: Seção dividida no que é requisitado para a criação de um animal e o que ele pode vir a ter se for preciso.***
+- Cada animal deve ter: nome, espécie, tutor, data de nascimento aproximada
+- Cada animal pode ter definido: raça, observações sobre sua saúde 
+
+***Modificações: Os tutores podem editar sua lista de animais, mas não os animais***
 - Tutores devem poder editar informações de seus animais
 
 **RF005 - Visualização de Animais**
 - Tutores devem visualizar lista de seus animais cadastrados
 - Deve ser possível visualizar dados completos de cada animal
+***Modificações: uma vacina não está mais atrelada a um animal, sim a uma consulta. Nas consultas é possível ver que vacinas foram tomadas.***
 - Deve mostrar data da última consulta e próxima vacina
+
 **RF006 - Histórico de Consultas (Tutor)**
 - Tutores devem visualizar histórico completo de consultas de cada animal
 - Deve mostrar data, procedimentos realizados e observações
-- Deve exibir-  vacinas aplicadas e datas de vencimento
+- Deve exibir vacinas aplicadas e datas de vencimento
 
 ### 1.3. Módulo de Gestão de Animais (Servidor)
 **RF007 - Pesquisa de Animais**
@@ -36,6 +48,7 @@
 - Deve permitir acesso rápido aos dados do animal
 
 **RF008 - Cadastro de Animais por Servidor**
+***Atualmente, só quem tem o poder de adicionar novos animais são os próprios tutores, enquanto os servidores podem criar atendimentos***
 - Servidores devem poder cadastrar novos animais no sistema
 - Deve ser possível vincular animal a tutor existente
 - Deve seguir mesma estrutura de dados do cadastro por tutor
@@ -94,7 +107,6 @@
 **RNF008 - Logs e Monitoramento**
 - Deve registrar logs de atividades importantes
 - Deve monitorar performance e gerar alertas para problemas
-- Logs devem ser mantidos por 90 dias
 
 ## 3. Regras de Negócio
 ### 3.1. Gestão de Usuário

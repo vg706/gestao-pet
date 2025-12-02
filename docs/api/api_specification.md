@@ -1,5 +1,7 @@
 # Especificação da API - Gestão-Pet
 
+Última atualização: 01/12/2025
+
 ## 1. Visão Geral da API
 A API do sistema Gestão-Pet segue o padrão RESTful e é hospedada no Back4App (Parse Server). Todas as requisições devem ser autenticadas usando o token de sessão, exceto os endpoints de login e cadastro.
 
@@ -35,7 +37,7 @@ Content-Type: application/json
   "objectId": "USER_ID",
   "username": "usuario@email.com",
   "email": "usuario@email.com",
-  "tipo": "tutor",
+  "role": "tutor",
   "nome": "Maria Silva",
   "sessionToken": "r:session_token_value",
   "createdAt": "2023-12-01T10:00:00.000Z",
@@ -62,7 +64,7 @@ Content-Type: application/json
   "username": "novo@email.com",
   "password": "senha123",
   "email": "novo@email.com",
-  "tipo": "tutor",
+  "role": "tutor",
   "nome": "João Santos"
 }
 ```
@@ -113,9 +115,7 @@ where={"usuario": {"__type":"Pointer","className":"_User","objectId":"USER_ID"}}
       "nome": "Rex",
       "especie": "cao",
       "raca": "Vira-lata",
-      "data_nascimento": "2020-06-15",
-      "peso": 18.5,
-      "comorbidades": "Nenhuma",
+      "nascimento": "2020-06-15",
       "observacoes": "Animal saudável",
       "usuario": {
         "__type": "Pointer",
@@ -140,9 +140,7 @@ where={"usuario": {"__type":"Pointer","className":"_User","objectId":"USER_ID"}}
   "nome": "Luna",
   "especie": "gato",
   "raca": "Siamesa",
-  "data_nascimento": "2021-03-20",
-  "peso": 4.2,
-  "comorbidades": "Alergia alimentar",
+  "nascimento": "2021-03-20",
   "observacoes": "Dieta especial",
   "usuario": {
     "__type": "Pointer",
@@ -164,9 +162,7 @@ where={"usuario": {"__type":"Pointer","className":"_User","objectId":"USER_ID"}}
   "nome": "Thor",
   "especie": "cao",
   "raca": "Labrador",
-  "data_nascimento": "2019-08-10",
-  "peso": 25.0,
-  "comorbidades": "Problema articular",
+  "nascimento": "2019-08-10",
   "observacoes": "Cuidado com escadas",
   "usuario": {
     "__type": "Pointer",
@@ -192,7 +188,7 @@ where={"usuario": {"__type":"Pointer","className":"_User","objectId":"USER_ID"}}
 
 ```json
 {
-  "peso": 26.5,
+  "nascimento": "01/01/2020",
   "observacoes": "Peso atualizado na última consulta"
 }
 ```
@@ -257,17 +253,16 @@ include=usuario
   "results": [
     {
       "objectId": "CONSULTA_ID",
-      "data_consulta": "2023-12-15",
+      "data": "2023-12-15",
       "procedimentos": "Consulta de rotina, aplicação de vacina V8",
-      "vacinas_aplicadas": "V8",
+      "vacinas": "V8",
       "observacoes": "Animal saudável, peso ideal",
-      "prescricao": "Retorno em 6 meses",
       "animal": {
         "__type": "Pointer",
         "className": "Animal",
         "objectId": "ANIMAL_ID"
       },
-      "usuario": {
+      "funcionario": {
         "objectId": "SERVIDOR_ID",
         "nome": "Dr. João Silva",
         "tipo": "servidor"
@@ -286,17 +281,16 @@ include=usuario
 
 ```json
 {
-  "data_consulta": "2023-12-15",
+  "data": "2023-12-15",
   "procedimentos": "Consulta de rotina, limpeza de ouvidos, aplicação de vacina",
-  "vacinas_aplicadas": "V8, Raiva",
+  "vacinas": "V8, Raiva",
   "observacoes": "Animal apresentou pequena irritação no ouvido direito",
-  "prescricao": "Usar limpa ouvidos 2x por semana por 15 dias",
   "animal": {
     "__type": "Pointer",
     "className": "Animal",
     "objectId": "ANIMAL_ID"
   },
-  "usuario": {
+  "funcionario": {
     "__type": "Pointer",
     "className": "_User",
     "objectId": "SERVIDOR_ID"
@@ -320,7 +314,7 @@ include=usuario
 **Query Parameters:**
 
 ```http
-include=animal,usuario
+include=animal,funcionario
 ```
 
 **Resposta de Sucesso (200):**
@@ -328,17 +322,16 @@ include=animal,usuario
 ```json
 {
   "objectId": "CONSULTA_ID",
-  "data_consulta": "2023-12-15",
+  "data": "2023-12-15",
   "procedimentos": "Consulta de emergência",
-  "vacinas_aplicadas": "",
+  "vacinas": "",
   "observacoes": "Animal apresentou vômitos, diagnosticado com gastrite",
-  "prescricao": "Dieta leve por 3 dias, medicamento X 1x ao dia",
   "animal": {
     "objectId": "ANIMAL_ID",
     "nome": "Rex",
     "especie": "cao"
   },
-  "usuario": {
+  "funcionario": {
     "objectId": "SERVIDOR_ID",
     "nome": "Dra. Ana Santos",
     "tipo": "servidor"
@@ -360,7 +353,7 @@ include=animal,usuario
   "objectId": "USER_ID",
   "username": "usuario@email.com",
   "email": "usuario@email.com",
-  "tipo": "tutor",
+  "role": "tutor",
   "nome": "Maria Silva",
   "createdAt": "2023-12-01T10:00:00.000Z",
   "updatedAt": "2023-12-15T14:30:00.000Z"
@@ -412,7 +405,7 @@ include=animal,usuario
 
 ```javascript
 // Exemplo de validação para criação de consulta
-Parse.Cloud.beforeSave("Consulta", (request) => {
+Parse.Cloud.beforeSave("Atendimento", (request) => {
   const user = request.user;
   const consulta = request.object;
   
@@ -420,7 +413,7 @@ Parse.Cloud.beforeSave("Consulta", (request) => {
     throw new Parse.Error(101, "Usuário não autenticado");
   }
   
-  if (user.get("tipo") !== "servidor") {
+  if (user.get("role") !== "servidor") {
     throw new Parse.Error(119, "Apenas servidores podem registrar consultas");
   }
   
@@ -429,12 +422,12 @@ Parse.Cloud.beforeSave("Consulta", (request) => {
   }
   
   // Define automaticamente o servidor que está registrando
-  consulta.set("usuario", user);
-  consulta.set("data_registro", new Date());
+  consulta.set("funcionario", user);
+  consulta.set("data", new Date());
 });
 
 // Validação para acesso a animais
-Parse.Cloud.beforeFind("Animal", (request) => {
+Parse.Cloud.beforeFind("animal", (request) => {
   const user = request.user;
   
   if (!user) {
@@ -454,14 +447,14 @@ Parse.Cloud.beforeFind("Animal", (request) => {
 
 ## 7. Códigos de Erro
 
-| Código | Descrição                 | Ação Recomendada                |
-|--------|---------------------------|---------------------------------|
-| 101    | Invalid username/password | Verificar credenciais           |
-| 102    | Invalid query             | Verificar parâmetros da query   |
-| 119    | Forbidden operation       | Usuário não tem permissão       |
-| 201    | Missing required field    | Preencher campo obrigatório     |
-| 202    | Email already taken       | Usar outro email                |
-| 209    | Invalid session token     | Fazer login novamente           |
+| Código | Descrição                  |
+| ------ | -------------------------- |
+| 101    | Usuário ou senha inválidos |
+| 119    | Operação não permitida     |
+| 201    | Campo obrigatório ausente  |
+| 202    | Email já cadastrado        |
+| 209    | Token inválido             |
+
 
 ## 8. Exemplos Completos
 

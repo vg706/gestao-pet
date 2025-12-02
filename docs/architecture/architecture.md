@@ -1,99 +1,98 @@
 # Arquitetura do Sistema - Gestão-Pet
+
+Última atualização: 01/12/2025
+
 ## 1. Descrição da Arquitetura
-O sistema Gestão-Pet adota uma arquitetura **cliente-servidor com backend como serviço (BaaS)**, projetada para oferecer escalabilidade, manutenibilidade e experiência multiplataforma consistente. A arquitetura é composta por três camadas principais: frontend web, frontend mobile e backend em nuvem.
+O sistema **Gestão-Pet** é uma aplicação multiplataforma (**Web + Mobile**) desenvolvida inteiramente em **React Native com Expo**, utilizando o recurso de **compilação para Web (React Native Web)**.
+O backend utiliza o **Back4App (Parse Server)** no modelo de **Backend-as-a-Service (BaaS)**.
+
+A arquitetura foi projetada para:
+- Código unificado entre Web e Mobile
+- Escalabilidade
+- Desenvolvimento rápido
+- Segurança com **CLPs, ACLs e Cloud Code**
+- Integração direta via **Parse SDK**
 
 ## 2. Diagrama de Arquitetura
 ```mermaid
 graph TB
-    subgraph "Frontend - Cliente"
-        WEB[Web App<br/>React.js]
-        MOBILE[Mobile App<br/>React Native]
+    subgraph "Frontend - Cliente (Universal)"
+        WEB[Web App<br/>React Native Web + Expo]
+        MOBILE[Mobile App<br/>React Native + Expo]
     end
 
-    subgraph "Backend - Back4App (BaaS)"
-        API[API REST]
-        AUTH[Serviço de Autenticação]
-        DB[(Banco de Dados<br/>PostgreSQL)]
-        STORAGE[Armazenamento de Arquivos]
+    subgraph "SDKs Cliente"
+        PARSEJS[Parse SDK]
+        ASYNC[AsyncStorage]
+        NAV[Expo Router]
     end
 
-    subgraph "Serviços Externos"
-        GITHUB[GitHub - Versionamento]
-        FIGMA[Figma - Design]
+    subgraph "Backend - Back4App (Parse Server)"
+        API[Parse REST API]
+        CLOUD[Cloud Code]
+        CLP[CLPs e ACLs]
+        DB[(PostgreSQL)]
+        FILES[Parse Files]
     end
 
-    WEB --> API
-    MOBILE --> API
-    API --> AUTH
+    subgraph "DevOps & Ferramentas"
+        GIT[GitHub]
+        ACTIONS[GitHub Actions]
+        FIGMA[Figma]
+        SENTRY[Sentry]
+        BACKUP[Backups]
+    end
+
+    WEB --> PARSEJS
+    MOBILE --> PARSEJS
+    PARSEJS --> API
+    API --> CLOUD
     API --> DB
-    API --> STORAGE
-    DEV[Equipe de Desenvolvimento] --> GITHUB
+    API --> FILES
+    API --> CLP
+    DEV[Equipe] --> GIT
+    GIT --> ACTIONS
     DEV --> FIGMA
+    SENTRY -.-> WEB
+    SENTRY -.-> MOBILE
+    BACKUP --> DB
 ```
 
 ## 3. Componentes do Sistema
 
-### 3.1. Frontend Web
-**Tecnologias:** React.js, HTML5, CSS3, JavaScript (ES6+)
+### 3.1. Frontend Universal (Web + Mobile)
+**Tecnologias:** React Native, Expo, React Native Web, expo-router, Parse SDK: parse/react-native.js, AsyncStorage
+A mesma base de código gera: Aplicativo Mobile (Android / iOS), aplicação web
 
-| Componente          | Tecnologia            | Responsabilidade                        |
-|---------------------|----------------------|-----------------------------------------|
-| Interface do Usuário | React.js + Components | Renderização das telas e componentes |
-| Roteamento          | React Router          | Navegação entre páginas |
-| Gerenciamento de Estado | React Context API | Estado global da aplicação |
-| Chamadas HTTP       | Axios                 | Comunicação com a API Back4App |
-| Estilização         | CSS Modules + Flexbox/Grid | Layout responsivo e consistente |
+**Responsabilidades:** 
+Autenticação de usuários
+Cadastro e listagem de animais
+Registro de atendimentos
+Pesquisa de tutores e pets
+Cache local de sessão
+Navegação entre telas
+Comunicação com o Parse
 
 **Estrutura de Pastas:**
 ```text
-src/
-├── components/          # Componentes reutilizáveis
-│   ├── common/         # Botões, inputs, modais
-│   ├── forms/          # Formulários de cadastro
-│   └── layout/         # Header, footer, sidebar
-├── pages/              # Páginas da aplicação
-│   ├── auth/           # Login e cadastro
-│   ├── tutor/          # Telas do tutor
-│   └── servidor/       # Telas do servidor
-├── services/           # Integração com APIs
-│   ├── api.js         # Configuração do Back4App
-│   └── auth.js        # Serviços de autenticação
-├── contexts/           # Gerenciamento de estado
-│   ├── AuthContext.js
-│   └── AppContext.js
-└── utils/              # Utilitários e helpers
+app/
+├── _layout.jsx                 # Layout global da aplicação (Stack/Navigation)
+├── index.jsx                   # Tela inicial (Home do app)
+│
+├── signup/                     # Fluxo de cadastro de usuário
+│   └── index.jsx               # Tela de cadastro
+│
+├── tutor/                      # Fluxo do Tutor (dono do animal)
+│   ├── index.jsx               # Lista de animais do tutor
+│   ├── animal-details.jsx     # Detalhes do animal + histórico
+│   └── register-animal.jsx    # Cadastro de novo animal
+│
+├── employee/                   # Fluxo do Funcionário / Servidor
+│   ├── index.jsx               # Tela principal do funcionário
+│   └── register-appointment.jsx # Registro de atendimento/consulta
 ```
 
-### 3.2. Frontend Mobile
-**Tecnologias:** React Native, Expo (opcional), iOS Swift (alternativa)
-
-| Componente          | Tecnologia            | Responsabilidade                        |
-|---------------------|----------------------|-----------------------------------------|
-| Interface Nativa    | React Native Components | UI adaptada para mobile |
-| Navegação           | React Navigation       | Stack e tab navigation |
-| Armazenamento Local | AsyncStorage          | Cache de dados offline |
-| Notificações        | Push Notifications    | Alertas e lembretes |
-| Integração API      | Axios/Fetch           | Comunicação com backend |
-
-**Estrutura de Telas Mobile:**
-```text
-screens/
-├── auth/
-│   ├── LoginScreen.js
-│   └── RegisterScreen.js
-├── tutor/
-│   ├── PetsListScreen.js
-│   ├── PetDetailScreen.js
-│   └── AddPetScreen.js
-├── servidor/
-│   ├── SearchScreen.js
-│   └── ConsultationScreen.js
-└── shared/
-    ├── ProfileScreen.js
-    └── SettingsScreen.js
-```
-
-### 3.3. Backend (Back4App)
+### 3.2. Backend (Back4App)
 **Plataforma:** Back4App (Parse Server)
 
 | Serviço        | Tipo                  | Descrição |
@@ -111,7 +110,7 @@ const User = {
   username: String,    // email
   password: String,    // hash
   email: String,
-  tipo: String,       // 'tutor' ou 'servidor'
+  role: String,       // 'tutor' ou 'servidor'
   nome: String,
   data_criacao: Date,
   ultimo_login: Date,
@@ -120,36 +119,57 @@ const User = {
 
 // Animal (dados dos pets)
 const Animal = {
-  usuario: Pointer<User>,
   nome: String,
-  especie: String,    // 'cao' ou 'gato'
+  especie: String,
   raca: String,
   data_nascimento: Date,
-  peso: Number,
-  comorbidades: String,
+  tutor: Pointer <Tutor>,
+  atendimentos: Relation <Atendimento>,
   observacoes: String,
   data_criacao: Date,
   ativo: Boolean
 };
 
-// Consulta (histórico veterinário)
-const Consulta = {
+// Atendimento (consulta realizada)
+const Atendimento = {
   animal: Pointer<Animal>,
-  usuario: Pointer<User>, // servidor que registrou
+  funcionario: Pointer<Funcionario>,
   data_consulta: Date,
   procedimentos: String,
-  vacinas_aplicadas: String,
+  vacinas: Relation<Vacina>,
   observacoes: String,
-  prescricao: String,
-  data_registro: Date
+  relatorio: String,
+  data: Date
 };
+
+// Dados do servidor público
+const Funcionario = {
+  usuario: Pointer<_User>,
+  senha: String,
+  nome: String,
+  email: String
+};
+
+// Dados do tutor
+const Tutor = {
+  usuario: Pointer<_User>,
+  senha: String,
+  nome: String,
+  email: String
+};
+
+// Dados do banco de vacinas pré-estabelecidas
+const Vacina = {
+  nome: String
+}
+
 ```
 
 ## 4. Padrões Arquiteturais Utilizados
 ### 4.1. Client-Server Pattern
 **Aplicação:** Separação entre frontend e backend  
 **Benefícios:** Escalabilidade independente, desenvolvimento paralelo  
-**Implementação:** Frontend React consome APIs REST do Back4App  
+**Implementação:** Frontend React Native consome APIs REST do Back4App  
 
 ### 4.2. MVC (Model-View-Controller)
 Aplicação: Organização do código frontend  
@@ -163,16 +183,14 @@ Aplicação: Organização do código frontend
 **Implementação:** Serviços API encapsulam chamadas ao Back4App  
 
 ```javascript
-// Exemplo: AnimalRepository
-class AnimalService {
-  static async getAnimalsByUser(userId) {
-    return await Back4AppAPI.get(`/classes/Animal?where={"usuario":"${userId}"}`);
-  }
-  
-  static async createAnimal(animalData) {
-    return await Back4AppAPI.post('/classes/Animal', animalData);
-  }
-}
+// Exemplo consulta ao banco
+  Parse.Cloud.beforeSave("Atendimento", (request) => {
+    const user = request.user;
+
+    if (!user || user.get("role") !== "servidor") {
+      throw "Apenas servidores podem registrar consultas.";
+    }
+  });
 ```
 
 ### 4.4. Component-Based Architecture
@@ -186,32 +204,28 @@ class AnimalService {
 sequenceDiagram
     participant U as Usuário
     participant F as Frontend
-    participant B as Back4App Auth
-    participant D as Banco de Dados
+    participant P as Parse Server
 
-    U->>F: Preenche credenciais
-    F->>B: POST /login
-    B->>D: Valida usuário/senha
-    D-->>B: Dados do usuário
-    B-->>F: Token de sessão + dados usuário
-    F->>F: Armazena token (localStorage)
-    F-->>U: Redireciona para dashboard
+    U->>F: Preenche login
+    F->>P: Parse.User.logIn()
+    P-->>F: sessionToken + dados
+    F->>F: Salva sessão
+    F-->>U: Acesso liberado
 ```
 
 ### 5.2. Registro de Consulta (Servidor)
 ```mermaid
 sequenceDiagram
     participant S as Servidor
-    participant F as Frontend
-    participant B as Back4App API
-    participant D as Banco de Dados
+    participant F as App Mobile
+    participant P as Parse API
+    participant C as Cloud Code
 
-    S->>F: Preenche formulário consulta
-    F->>B: POST /classes/Consulta
-    B->>D: Insere registro consulta
-    D-->>B: Confirma inserção
-    B-->>F: Dados da consulta criada
-    F-->>S: Confirmação de sucesso
+    S->>F: Preenche atendimento
+    F->>P: POST Consulta
+    P->>C: beforeSave
+    C-->>P: Permissão validada
+    P-->>F: Consulta criada
 ```
 
 ### 5.3. Acesso ao Histórico (Tutor)
@@ -239,19 +253,22 @@ sequenceDiagram
 - Escalabilidade  
 - Manutenção gerenciada  
 
-### 6.2. React.js para Frontend Web
-- Curva de aprendizado favorável  
-- Ecossistema robusto  
-- Reutilização com React Native  
-- Performance (Virtual DOM)  
-- Flexibilidade  
+### 6.2. React Native como Frontend Universal (Web + Mobile)
 
-### 6.3. React Native para Mobile
-- Código compartilhado (~70%)  
-- Produtividade  
+Todo o frontend do sistema foi desenvolvido utilizando **React Native com Expo**, permitindo que a **mesma base de código** seja utilizada tanto para **aplicação Web (React Native Web)** quanto para **aplicações Mobile (Android e iOS)**.
+
+Essa decisão elimina a separação entre “React Web” e “React Native Mobile”, simplificando a arquitetura do projeto.
+
+**Justificativas:**
+- Código único para Web e Mobile  
+- Redução de retrabalho e duplicação de lógica  
+- Produtividade no desenvolvimento  
+- Navegação unificada com `expo-router`  
+- Integração direta com o Parse SDK  
 - Manutenção centralizada  
-- Performance suficiente  
-- Alternativa nativa (Swift, se necessário)  
+- Atualizações simultâneas em todas as plataformas  
+- Performance suficiente para aplicações de gestão  
+- Facilidade de publicação (web, Android e iOS)
 
 ### 6.4. Arquitetura de Estado (Context API)
 - Simplicidade  
@@ -270,13 +287,12 @@ sequenceDiagram
 **Login/Cadastro → Lista de Pets → Detalhes do Animal → Histórico de Consultas**  
 
 ### 7.2. Fluxo do Servidor
-**Login → Pesquisa de Animal → Registro de Consulta**  
+**Login/Cadastro → Busca por tutores → Lista de animais do tutor → Detalhes do Animal → Histórico de Consultas**  
 
 ### 7.3. Design System
 - Azul (#667eea) para ações primárias  
 - Tipografia sans-serif  
 - Cards, botões hierarquizados  
-- Abas no mobile, menu lateral no web  
 
 ## 8. Protótipos e Design
 Protótipos disponíveis em `../prototypes/`.  
@@ -306,20 +322,7 @@ Protótipos disponíveis em `../prototypes/`.
 - Sanitização de dados frontend/backend  
 - CORS restritivo  
 
-### 9.2. Controle de Acesso
-```javascript
-// Back4App Cloud Code - Validação de permissões
-Parse.Cloud.beforeSave("Consulta", (request) => {
-  const user = request.user;
-  const consulta = request.object;
-  
-  if (!user || user.get("tipo") !== "servidor") {
-    throw "Apenas servidores podem registrar consultas";
-  }
-});
-```
-
-### 9.3. Proteção de Dados Sensíveis
+### 9.2. Proteção de Dados Sensíveis
 - **Senhas** com hash bcrypt  
 - **Dados pessoais** protegidos pela LGPD  
 - **Histórico médico** com acesso restrito  
