@@ -119,6 +119,61 @@ O sistema segue uma arquitetura cliente-servidor com frontend multiplataforma (w
 2. **Fluxo Tutor:** Visualização de animais → Acesso ao histórico → Gestão de dados
 3. **Fluxo Servidor:** Pesquisa de animais → Registro de consultas → Cadastro de novos animais
 
+## Telas do app em funcionamento
+
+### Telas Web
+**Tela de Login funcionario**
+![](images/login-funcionario-web.png)
+
+**Tela de Login tutor**
+![](images/login-tutor-web.png)
+
+**Tela de Cadastro de Usuário**
+![](images/cadastro-usuario-web.png)
+
+**Tela Meus Pets**
+![](images/lista-pets-tutor-web.png)
+
+**Tela detalhes do animal**
+![](images/detalhes-animal-tutor-web.png)
+
+**Tela cadastro de animal**
+![](images/registro-animal-tutor-web.png)
+
+**Tela pesquisa por tutor**
+![](images/busca-por-tutor-funcionario-web-1.png)
+
+![](images/busca-por-tutor-funcionario-web-2.png)
+
+**Tela registro de consulta**
+![](images/registro-consulta-funcionario-web.png)
+
+### Telas Mobile
+**Tela de Login funcionario**
+![](images/login-funcionario-mobile.png)
+
+**Tela de Login tutor**
+![](images/login-tutor-mobile.png)
+
+**Tela de Cadastro de Usuário**
+![](images/cadastro-usuario-mobile.jpeg)
+
+**Tela Meus Pets**
+![](images/lista-pets-tutor-mobile.png)
+
+**Tela detalhes do animal**
+![](images/detalhes-animal-tutor-mobile.jpeg)
+
+**Tela cadastro de animal**
+![](images/registro-animal-tutor-mobile.png)
+
+**Tela pesquisa por tutor**
+![](images/busca-por-tutor-funcionario-mobile.png)
+
+**Tela registro de consulta**
+![](images/registro-consulta-funcionario-mobile.png)
+
+
 ## Protótipos de Interface
 ### Telas Web
 **Tela de Login**
